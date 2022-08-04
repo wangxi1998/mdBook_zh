@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
-use elasticlunr::{Index, IndexBuilder};
+use elasticlunr::{Index, lang::Chinese, IndexBuilder};
 use pulldown_cmark::*;
 
 use crate::book::{Book, BookItem};
@@ -34,7 +34,7 @@ pub fn create_files(
     let mut index = match lang {
         Some(lang_str) => match lang_str.to_lowercase().as_str() {
             "zh" => Index::with_language(
-                elasticlunr::lang::Chinese,
+                Box::new(English::new()),
                 &["title", "body", "breadcrumbs"],
             ),
             _ => IndexBuilder::new()
