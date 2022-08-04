@@ -34,7 +34,7 @@ pub fn create_files(
     let mut index = match lang {
         Some(lang_str) => match lang_str.to_lowercase().as_str() {
             "zh" => Index::with_language(
-                elasticlunr::Language::Chinese,
+                elasticlunr::lang::Chinese,
                 &["title", "body", "breadcrumbs"],
             ),
             _ => IndexBuilder::new()
