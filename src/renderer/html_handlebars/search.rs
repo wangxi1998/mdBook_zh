@@ -25,12 +25,30 @@ fn tokenize(text: &str) -> Vec<String> {
 }
 
 /// Creates all files required for search.
-pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> Result<()> {
-    let mut index = IndexBuilder::new()
+pub fn create_files(
+    search_config: &Search,
+    lang: &Option<String>,
+    destination: &Path,
+    book: &Book,
+) -> Result<()> {
+    let mut index = match lang {
+        Some(lang_str) => match lang_str.to_lowercase().as_str() {
+            "zh" => Index::with_language(
+                elasticlunr::Language::Chinese,
+                &["title", "body", "breadcrumbs"],
+            ),
+            _ => IndexBuilder::new()
         .add_field_with_tokenizer("title", Box::new(&tokenize))
         .add_field_with_tokenizer("body", Box::new(&tokenize))
         .add_field_with_tokenizer("breadcrumbs", Box::new(&tokenize))
-        .build();
+        .build(),
+        },
+        None => IndexBuilder::new()
+        .add_field_with_tokenizer("title", Box::new(&tokenize))
+        .add_field_with_tokenizer("body", Box::new(&tokenize))
+        .add_field_with_tokenizer("breadcrumbs", Box::new(&tokenize))
+        .build(),
+    };
 
     let mut doc_urls = Vec::with_capacity(book.sections.len());
 
@@ -54,6 +72,7 @@ pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> 
         utils::fs::write_file(destination, "searcher.js", searcher::JS)?;
         utils::fs::write_file(destination, "mark.min.js", searcher::MARK_JS)?;
         utils::fs::write_file(destination, "elasticlunr.min.js", searcher::ELASTICLUNR_JS)?;
+        utils::fs::write_file(destination, "lunr.zh.js", searcher::LUNR_ZH_JS)?;
         debug!("Copying search files ✓");
     }
 
