@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
-use elasticlunr::{Index, lang::Chinese, IndexBuilder};
+use elasticlunr::Index;
 use pulldown_cmark::*;
 
 use crate::book::{Book, BookItem};
@@ -34,20 +34,12 @@ pub fn create_files(
     let mut index = match lang {
         Some(lang_str) => match lang_str.to_lowercase().as_str() {
             "zh" => Index::with_language(
-                Box::new(Chinese::new()),
+                elasticlunr::Language::Chinese,
                 &["title", "body", "breadcrumbs"],
             ),
-            _ => IndexBuilder::new()
-        .add_field_with_tokenizer("title", Box::new(&tokenize))
-        .add_field_with_tokenizer("body", Box::new(&tokenize))
-        .add_field_with_tokenizer("breadcrumbs", Box::new(&tokenize))
-        .build(),
+            _ => Index::new(&["title", "body", "breadcrumbs"]),
         },
-        None => IndexBuilder::new()
-        .add_field_with_tokenizer("title", Box::new(&tokenize))
-        .add_field_with_tokenizer("body", Box::new(&tokenize))
-        .add_field_with_tokenizer("breadcrumbs", Box::new(&tokenize))
-        .build(),
+        None => Index::new(&["title", "body", "breadcrumbs"]),
     };
 
     let mut doc_urls = Vec::with_capacity(book.sections.len());
